@@ -6,7 +6,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
-import java.util.Arrays;
 
 @SpringBootTest(classes = RestApiH2Application.class)
 @AutoConfigureMockMvc
@@ -27,14 +24,12 @@ public class UserControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    long userIdJohn = 1L;
-    long userIdJane = 2L;
-
     @BeforeEach
     public void setUp() {
         userRepository.save(new User("John", "Doe", "john@example.com"));
         userRepository.save(new User("Jane", "Doe", "jane@example.com"));
     }
+
     @AfterEach
     public void reset() {
         userRepository.deleteAll();
@@ -56,6 +51,36 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    public void testAddUser() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("Jack", "Doe", "jack@example.com"))))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Jack"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.vorname").value("Doe"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("jack@example.com"));
+    }
+
+    @Test
+    public void testEmailNotNullable() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("Jack", "Doe",null))))
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
+    }
+
+    @Test
+    public void testEmailUnique() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("Jack", "Bro","john@example.com"))))
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
     }
 
     @Test

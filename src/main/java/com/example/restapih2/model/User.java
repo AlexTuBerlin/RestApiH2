@@ -15,11 +15,12 @@ public class User {
     @Column(name = "vorname")
     private String vorname;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     public User() {
     }
+
     public User(String name, String vorname, String email) {
         this.name = name;
         this.vorname = vorname;
