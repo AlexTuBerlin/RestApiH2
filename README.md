@@ -5,10 +5,10 @@ Java Rest Controller using embedded H2 DB
 (develop)     http://localhost:8000/ <br>
 (production)  http://localhost:9000/ <br>
 
-##H2 Config
+## H2 Config
 /h2-ui
 
-##Swagger UI
+## Swagger UI
 /swagger-ui/index.html
 
 ## REST ENDPOINT SPECS
