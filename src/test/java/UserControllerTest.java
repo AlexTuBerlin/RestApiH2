@@ -26,8 +26,8 @@ public class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        userRepository.save(new User("John", "Doe", "john@example.com"));
-        userRepository.save(new User("Jane", "Doe", "jane@example.com"));
+        userRepository.save(new User("John", "Doe", "john@mail.com"));
+        userRepository.save(new User("Jane", "Doe", "jane@mail.com"));
     }
 
     @AfterEach
@@ -37,7 +37,6 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsers() throws Exception {
-
         mockMvc.perform(MockMvcRequestBuilders.get("/api/users")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -46,7 +45,6 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsersWithName() throws Exception {
-
         mockMvc.perform(MockMvcRequestBuilders.get("/api/users?name=John")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -55,37 +53,79 @@ public class UserControllerTest {
 
     @Test
     public void testAddUser() throws Exception {
-
         mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(new User("Jack", "Doe", "jack@example.com"))))
+                        .content(asJsonString(new User("Jack", "Doe", "jack@mail.com"))))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Jack"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.vorname").value("Doe"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("jack@example.com"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("jack@mail.com"));
     }
 
     @Test
     public void testEmailNotNullable() throws Exception {
-
         mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(new User("Jack", "Doe",null))))
-                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
     public void testEmailUnique() throws Exception {
-
         mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(new User("Jack", "Bro","john@example.com"))))
+                        .content(asJsonString(new User("Jack", "Bro","john@mail.com"))))
                 .andExpect(MockMvcResultMatchers.status().is5xxServerError());
     }
 
     @Test
-    public void testGetUserById() throws Exception {
+    public void testEmailValidation() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("Jack", "Doe", ".jack@mail.com"))))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("Jack", "Doe", "jack@.com"))))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("Jack", "Doe", "jack.com"))))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    public void testNameValidation() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("Jack", null, "jack@mail.com"))))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Jack"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("jack@mail.com"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("Jack Joe", null, "jackJoe@mail.com"))))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Jack Joe"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.vorname").isEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("jackJoe@mail.com"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("", "Doe", "jackNull@mail.com"))))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(new User("645745!§", "Doe", "jack.com"))))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    public void testGetUserById() throws Exception {
         long userId = getIdByName("John");
         mockMvc.perform(MockMvcRequestBuilders.get("/api/users/{id}", userId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -95,7 +135,6 @@ public class UserControllerTest {
 
     @Test
     public void testDeleteUserById() throws Exception {
-
         long userId = getIdByName("John");
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/{id}", getIdByName("John"))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -122,9 +161,8 @@ public class UserControllerTest {
 
     @Test
     public void testUpdateUser() throws Exception {
-
         long userId = getIdByName("John");
-        User updatedUserData = new User("Updated", "User", "updated@example.com");
+        User updatedUserData = new User("Updated", "User", "updated@mail.com");
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/users/{id}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
