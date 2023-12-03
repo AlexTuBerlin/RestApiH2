@@ -2,10 +2,14 @@
 Java Rest Controller using embedded H2 DB
 
 ## Application Ports:
-(develop)     http://localhost:8000/
-(production)  http://localhost:9000/
+(develop)     http://localhost:8000/ <br>
+(production)  http://localhost:9000/ <br>
 
-Swagger Ui Url = /swagger-ui/index.html
+##H2 Config
+/h2-ui
+
+##Swagger UI
+/swagger-ui/index.html
 
 ## REST ENDPOINT SPECS
 | Http Verb | Endpoint           | Function           |
@@ -26,8 +30,8 @@ Swagger Ui Url = /swagger-ui/index.html
 |email	   |string              |UNIQUE, NOT NULL    |
 
 ## VALIDATION
-name, vorname  - Name REGEX
-email          - OWASP REGEX
+name, vorname  - Name REGEX <br>
+email          - OWASP REGEX <br>
 
 ## Maven Build JAR:
 ### Develop (Unit Tests active) (default)
