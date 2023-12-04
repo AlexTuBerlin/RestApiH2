@@ -12,10 +12,11 @@ Java Rest Controller using embedded H2 DB
 /swagger-ui/index.html
 
 ## REST ENDPOINT SPECS
-| Http Verb | Endpoint           | Function           |
-| --------- | ------------------ | ------------------ |
-| GET       |     api/users      | return all Users   |
-| POST      |     api/users      | add User           |
+| Http Verb | Endpoint                   | Function           |
+| --------- | ------------------         | ------------------ |
+| GET       |     api/users              | return all Users   |
+| GET       |     api/users?name={name}  | return all Users with name={name}   |
+| POST      |     api/users               | add User           |
 | DELETE    |     api/users      | delete all User    |
 | GET       |     api/users/{id} | return User by ID  |
 | PUT       |     api/users/{id} | update User by ID  |
